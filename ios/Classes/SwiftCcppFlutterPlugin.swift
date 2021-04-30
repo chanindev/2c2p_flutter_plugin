@@ -82,7 +82,7 @@ public class SwiftCcppFlutterPlugin: NSObject, FlutterPlugin, Transaction3DSDele
         let paymentCode: PaymentCode = PaymentCode(channelCode: "CC")
            
         let paymentRequest: PaymentRequest = CardTokenPaymentBuilder(paymentCode: paymentCode, cardToken)
-                                             .securityCode(securityCode)
+        //                                     .securityCode(securityCode)
                                              .build()
         
         //Construct transaction request

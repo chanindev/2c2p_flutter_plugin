@@ -117,7 +117,7 @@ class CcppFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware, Activ
 
         //Construct credit card request
         val paymentRequest = CardTokenPaymentBuilder(paymentCode, cardToken)
-                .setSecurityCode(securityCode)
+              //  .setSecurityCode(securityCode)
                 .build()
 
         //Construct transaction request
