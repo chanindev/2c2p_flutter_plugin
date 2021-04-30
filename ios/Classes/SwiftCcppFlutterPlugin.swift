@@ -49,7 +49,7 @@ public class SwiftCcppFlutterPlugin: NSObject, FlutterPlugin, Transaction3DSDele
                 let args = call.arguments as! Dictionary<String, Any>
                 let paymentToken = args["paymentToken"] as! String
                 let cardToken = args["cardToken"] as! String
-                let securityCode = args["securityCode"] as! String
+                let securityCode = ""
                 paymentWithToken(paymentToken,
                                  cardToken: cardToken,
                                  securityCode: securityCode)
