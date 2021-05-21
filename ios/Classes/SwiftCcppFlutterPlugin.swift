@@ -24,7 +24,7 @@ public class SwiftCcppFlutterPlugin: NSObject, FlutterPlugin, Transaction3DSDele
         switch(call.method){
             case "initialize":
                 let args = call.arguments as! Dictionary<String, Any>
-                let isSandbox = args["isSandBox"] as! Bool
+                let isSandbox = (args["isSandBox"] as? Bool) ?? false
                 let apiEnv = isSandbox ? APIEnvironment.Sandbox : APIEnvironment.Production
                 
                 let params: PGWSDKParams = PGWSDKParamsBuilder(apiEnvironment: apiEnv).build()
@@ -33,12 +33,12 @@ public class SwiftCcppFlutterPlugin: NSObject, FlutterPlugin, Transaction3DSDele
                 result(nil)
             case "paymentWithCreditCard":
                 let args = call.arguments as! Dictionary<String, Any>
-                let paymentToken = args["paymentToken"] as! String
-                let ccNumber = args["ccNumber"] as! String
-                let expMonth = args["expMonth"] as! Int
-                let expYear = args["expYear"] as! Int
-                let securityCode = args["securityCode"] as! String
-                let storeCard = args["storeCard"] as! Bool
+                let paymentToken = (args["paymentToken"] as? String) ?? ""
+                let ccNumber = (args["ccNumber"] as? String) ?? ""
+                let expMonth = (args["expMonth"] as? Int) ?? 0
+                let expYear = (args["expYear"] as? Int) ?? 0
+                let securityCode = (args["securityCode"] as? String) ?? ""
+                let storeCard = (args["storeCard"] as? Bool) ?? false
                 paymentWithCreditCard(paymentToken,
                                       ccNumber: ccNumber,
                                       expMonth: expMonth,
@@ -47,8 +47,8 @@ public class SwiftCcppFlutterPlugin: NSObject, FlutterPlugin, Transaction3DSDele
                                       storeCard: storeCard)
             case "paymentWithToken":
                 let args = call.arguments as! Dictionary<String, Any>
-                let paymentToken = args["paymentToken"] as! String
-                let cardToken = args["cardToken"] as! String
+                let paymentToken = (args["paymentToken"] as? String) ?? ""
+                let cardToken = (args["cardToken"] as? String) ?? ""
                 let securityCode = ""
                 paymentWithToken(paymentToken,
                                  cardToken: cardToken,
