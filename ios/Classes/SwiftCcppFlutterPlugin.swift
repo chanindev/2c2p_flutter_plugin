@@ -178,20 +178,31 @@ class WKWebViewController: UIViewController {
     }
 
     func transactionResultCallback() -> PGWWebViewNavigationDelegate {
-        self.pgwWebViewDelegate = PGWWebViewNavigationDelegate({ (response: TransactionResultResponse) in
-            if response.responseCode == APIResponseCode.TransactionCompleted {
-                //Inquiry payment result by using invoice no.
-                let invoiceNo:String = response.invoiceNo
-                self.transaction3dsDelegate.onTransactionResult(invoiceNo, nil)
-                self.dismiss(animated: true, completion: nil)
-            } else {
-                //Get error response and display error
-                self.transaction3dsDelegate.onTransactionResult(nil, response.responseDescription!)
+        self.pgwWebViewDelegate = PGWWebViewNavigationDelegate({ (paymentToken: String) in
+        
+            //Step 2: Construct transaction status inquiry request.
+            let transactionStatusRequest: TransactionStatusRequest = TransactionStatusRequest(paymentToken: paymentToken)
+            transactionStatusRequest.additionalInfo = true
+ 
+            //Do Transaction Status Inquiry API and close this WebView.
+            PGWSDK.shared.transactionStatus(transactionStatusRequest: transactionStatusRequest, { (response: TransactionStatusResponse) in
+                     
+                 if response.responseCode == APIResponseCode.TransactionNotFound || response.responseCode == APIResponseCode.TransactionCompleted {
+                      //Read transaction status inquiry response.
+                    let invoiceNo:String = response.invoiceNo
+                    self.transaction3dsDelegate.onTransactionResult(invoiceNo, nil)
+                    self.dismiss(animated: true, completion: nil)
+                    
+                 } else {
+                      //Get error response and display error.
+                    self.transaction3dsDelegate.onTransactionResult(nil, response.responseDescription!)
+                    self.dismiss(animated: true, completion: nil)
+                 }
+            }) { (error: NSError) in
+                 //Get error response and display error.
+                self.transaction3dsDelegate.onTransactionResult(nil, error.description)
                 self.dismiss(animated: true, completion: nil)
             }
-        }, { (error: NSError) in
-            self.transaction3dsDelegate.onTransactionResult(nil, error.description)
-            self.dismiss(animated: true, completion: nil)
         })
         
         return self.pgwWebViewDelegate
