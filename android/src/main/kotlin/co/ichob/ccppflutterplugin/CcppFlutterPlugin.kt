@@ -129,36 +129,38 @@ class CcppFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware, Activ
     }
 
     private fun proceedTransaction(result: MethodChannel.Result, transactionResultRequest: TransactionResultRequest) {
-        PGWSDK.getInstance().proceedTransaction(transactionResultRequest, object: APIResponseCallback<TransactionResultResponse> {
-            override fun onResponse(transactionResultResponse: TransactionResultResponse) {
-                when(transactionResultResponse.responseCode) {
-                    APIResponseCode.TransactionAuthenticateRedirect, APIResponseCode.TransactionAuthenticateFullRedirect -> {
-                        val redirectUrl = transactionResultResponse.data
+        PGWSDK.getInstance().transactionStatus(
+            transactionStatusRequest,
+            object : APIResponseCallback<TransactionStatusResponse?>() {
+                @Override
+                fun onResponse(response: TransactionStatusResponse) {
+                    if (response.getResponseCode()
+                            .equals(APIResponseCode.TransactionNotFound) || response.getResponseCode()
+                            .equals(APIResponseCode.TransactionCompleted)
+                    ) {
+                        //Read transaction status inquiry response.
+                        APIResponseCode.TransactionAuthenticateRedirect, APIResponseCode.TransactionAuthenticateFullRedirect -> {
+                            val redirectUrl = transactionResultResponse.data
 
-                        //Open WebView for 3DS
-                        val i = Intent(activity, WebViewActivity::class.java)
-                        i.putExtra("redirect", redirectUrl)
-                        activity?.startActivityForResult(i, CCPP_AUTH_REQUEST_CODE)
+                            //Open WebView for 3DS
+                            val i = Intent(activity, WebViewActivity::class.java)
+                            i.putExtra("redirect", redirectUrl)
+                            activity?.startActivityForResult(i, CCPP_AUTH_REQUEST_CODE)
+                        } else {
+                            //Get error response and display error.
+                            val response = mapOf<String, Any>("errorMessage" to transactionResultResponse.responseDescription)
+                            result.success(response)
+                        }
                     }
-                    APIResponseCode.TransactionCompleted -> {
-                        val invoiceNo = transactionResultResponse.invoiceNo
-                        val response = mapOf<String, Any>("invoiceNo" to invoiceNo)
-                        result.success(response)
-                    }
-                    else -> {
+
+                    @Override
+                    fun onFailure(error: Throwable?) {
                         //Get error response and display error
-                        val response = mapOf<String, Any>("errorMessage" to transactionResultResponse.responseDescription)
+                        val response = mapOf<String, Any>("errorMessage" to (error.message ?: "Unknown error"))
                         result.success(response)
                     }
-                }
+                })
             }
-
-            override fun onFailure(error: Throwable) {
-                //Get error response and display error
-                val response = mapOf<String, Any>("errorMessage" to (error.message ?: "Unknown error"))
-                result.success(response)
-            }
-        })
     }
     
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?): Boolean {
