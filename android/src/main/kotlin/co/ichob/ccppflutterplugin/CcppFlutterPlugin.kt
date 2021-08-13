@@ -140,6 +140,7 @@ class CcppFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware, Activ
                         i.putExtra("redirect", redirectUrl)
                         activity?.startActivityForResult(i, CCPP_AUTH_REQUEST_CODE)
                     }
+                    
                     APIResponseCode.TransactionCompleted -> {
                         val invoiceNo = transactionResultResponse.invoiceNo
                         val response = mapOf<String, Any>("invoiceNo" to invoiceNo)
