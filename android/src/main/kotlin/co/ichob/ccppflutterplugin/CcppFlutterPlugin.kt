@@ -60,7 +60,7 @@ class CcppFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware, Activ
     override fun onDetachedFromActivityForConfigChanges() {
         activity = null
     }
-    
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         this.result = result
         when (call.method) {
@@ -97,16 +97,16 @@ class CcppFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware, Activ
 
         //Construct credit card request
         val paymentRequest = CardPaymentBuilder(paymentCode, ccNumber)
-                .setExpiryMonth(expMonth)
-                .setExpiryYear(expYear)
-                .setSecurityCode(securityCode)
-                .setTokenize(storeCard)
-                .build()
+            .setExpiryMonth(expMonth)
+            .setExpiryYear(expYear)
+            .setSecurityCode(securityCode)
+            .setTokenize(storeCard)
+            .build()
 
         //Construct transaction request
         val transactionRequest = TransactionResultRequestBuilder(paymentToken)
-                .with(paymentRequest)
-                .build()
+            .with(paymentRequest)
+            .build()
 
         //Execute payment request
         proceedTransaction(result, transactionRequest)
@@ -117,52 +117,50 @@ class CcppFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware, Activ
 
         //Construct credit card request
         val paymentRequest = CardTokenPaymentBuilder(paymentCode, cardToken)
-              //  .setSecurityCode(securityCode)
-                .build()
+            //  .setSecurityCode(securityCode)
+            .build()
 
         //Construct transaction request
         val transactionRequest = TransactionResultRequestBuilder(paymentToken)
-                .with(paymentRequest)
-                .build()
+            .with(paymentRequest)
+            .build()
 
         proceedTransaction(result, transactionRequest)
     }
 
     private fun proceedTransaction(result: MethodChannel.Result, transactionResultRequest: TransactionResultRequest) {
-        PGWSDK.getInstance().transactionStatus(
-            transactionStatusRequest,
-            object : APIResponseCallback<TransactionStatusResponse?>() {
-                @Override
-                fun onResponse(response: TransactionStatusResponse) {
-                    if (response.getResponseCode()
-                            .equals(APIResponseCode.TransactionNotFound) || response.getResponseCode()
-                            .equals(APIResponseCode.TransactionCompleted)
-                    ) {
-                        //Read transaction status inquiry response.
-                        APIResponseCode.TransactionAuthenticateRedirect, APIResponseCode.TransactionAuthenticateFullRedirect -> {
-                            val redirectUrl = transactionResultResponse.data
+        PGWSDK.getInstance().proceedTransaction(transactionResultRequest, object: APIResponseCallback<TransactionResultResponse> {
+            override fun onResponse(transactionResultResponse: TransactionResultResponse) {
+                when(transactionResultResponse.responseCode) {
+                    APIResponseCode.TransactionAuthenticateRedirect, APIResponseCode.TransactionAuthenticateFullRedirect -> {
+                        val redirectUrl = transactionResultResponse.data
 
-                            //Open WebView for 3DS
-                            val i = Intent(activity, WebViewActivity::class.java)
-                            i.putExtra("redirect", redirectUrl)
-                            activity?.startActivityForResult(i, CCPP_AUTH_REQUEST_CODE)
-                        } else {
-                            //Get error response and display error.
-                            val response = mapOf<String, Any>("errorMessage" to transactionResultResponse.responseDescription)
-                            result.success(response)
-                        }
+                        //Open WebView for 3DS
+                        val i = Intent(activity, WebViewActivity::class.java)
+                        i.putExtra("redirect", redirectUrl)
+                        activity?.startActivityForResult(i, CCPP_AUTH_REQUEST_CODE)
                     }
-
-                    @Override
-                    fun onFailure(error: Throwable?) {
-                        //Get error response and display error
-                        val response = mapOf<String, Any>("errorMessage" to (error.message ?: "Unknown error"))
+                    APIResponseCode.TransactionCompleted -> {
+                        val invoiceNo = transactionResultResponse.invoiceNo
+                        val response = mapOf<String, Any>("invoiceNo" to invoiceNo)
                         result.success(response)
                     }
-                })
+                    else -> {
+                        //Get error response and display error
+                        val response = mapOf<String, Any>("errorMessage" to transactionResultResponse.responseDescription)
+                        result.success(response)
+                    }
+                }
             }
+
+            override fun onFailure(error: Throwable) {
+                //Get error response and display error
+                val response = mapOf<String, Any>("errorMessage" to (error.message ?: "Unknown error"))
+                result.success(response)
+            }
+        })
     }
-    
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?): Boolean {
         if (requestCode == CCPP_AUTH_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
@@ -170,8 +168,8 @@ class CcppFlutterPlugin : MethodCallHandler, FlutterPlugin, ActivityAware, Activ
                 val errorMessage = intent?.getStringExtra("errorMessage")
 
                 val response = mapOf<String, Any?>(
-                        "invoiceNo" to invoiceNo,
-                        "errorMessage" to errorMessage
+                    "invoiceNo" to invoiceNo,
+                    "errorMessage" to errorMessage
                 )
                 result?.success(response)
                 return true
