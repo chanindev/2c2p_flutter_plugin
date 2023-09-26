@@ -1,22 +1,22 @@
 PODS:
-  - ccppflutterplugin (0.0.1):
-    - Flutter
   - Flutter (1.0.0)
+  - flutter_ccpp (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
-  - ccppflutterplugin (from `.symlinks/plugins/ccppflutterplugin/ios`)
   - Flutter (from `Flutter`)
+  - flutter_ccpp (from `.symlinks/plugins/flutter_ccpp/ios`)
 
 EXTERNAL SOURCES:
-  ccppflutterplugin:
-    :path: ".symlinks/plugins/ccppflutterplugin/ios"
   Flutter:
     :path: Flutter
+  flutter_ccpp:
+    :path: ".symlinks/plugins/flutter_ccpp/ios"
 
 SPEC CHECKSUMS:
-  ccppflutterplugin: 61f89f18c99906898149c422b67bba89a76ff3e0
-  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  flutter_ccpp: 98c17f555f27cc3aff04debf237dde3e6aa95270
 
-PODFILE CHECKSUM: c34e2287a9ccaa606aeceab922830efb9a6ff69a
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 
-COCOAPODS: 1.9.3
+COCOAPODS: 1.10.1

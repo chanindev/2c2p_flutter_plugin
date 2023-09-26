@@ -1,4 +1,4 @@
-package co.ichob.ccppflutterplugin_example
+package me.peatiscoding.flutter_ccpp_example
 
 import io.flutter.embedding.android.FlutterActivity
 

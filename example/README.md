@@ -1,6 +1,6 @@
-# ccppflutterplugin_example
+# flutter_ccpp_example
 
-Demonstrates how to use the ccppflutterplugin plugin.
+Demonstrates how to use the flutter_ccpp plugin.
 
 ## Getting Started
 
